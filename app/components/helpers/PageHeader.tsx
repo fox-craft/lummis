@@ -1,6 +1,7 @@
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
+// @ts-ignore
 function PageHeader({ children, title, sx = {} }) {
     return (
         <Stack

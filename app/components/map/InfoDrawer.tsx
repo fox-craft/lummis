@@ -43,16 +43,6 @@ export default function InfoDrawer({featureId, open}: { featureId: number, open:
             {data && (
                 <Box sx={{display: "flex", padding: 3}}>
                     <Stack spacing={3}>
-                    {
-                        Object.entries(data).map((key, value) => (
-                                <Stack spacing={2} direction='column' key={key}>
-                                    <Typography key={`${key}-${value}`}>{key}</Typography>
-                                    <Typography key={`${key}xxx${value}`}>{value}</Typography>
-                                </Stack>
-
-                            )
-                        )
-                    }
                 </Stack>
                 </Box>
             )}
