@@ -64,8 +64,8 @@ function preventDefault(event: React.MouseEvent) {
 }
 
 export default function Projects() {
-    const {countyName} = useContext(FilterContext)
-    const {data} = useProjectsQuery(countyName)
+    const {landscape} = useContext(FilterContext)
+    const {data} = useProjectsQuery(landscape)
 
     const recent_projects = () =>  {
         const now = dayjs()

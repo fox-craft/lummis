@@ -1,4 +1,5 @@
 import {any} from "prop-types";
+import {GeoJSON} from "geojson";
 
 export const prepareFiltersQueryParams = (filters: { [key: string]: any}): any =>  {
     const f =  Object.entries(filters).map(([key, value]) => `${key}=${value}`).join('&')
@@ -6,7 +7,7 @@ export const prepareFiltersQueryParams = (filters: { [key: string]: any}): any =
     return f
 }
 
-export function isValidGeoJsonObject(obj: any): obj is GeoJSON.FeatureCollection {
+export function isValidGeoJsonObject(obj: any): obj is GeoJSON {
     return (
         obj &&
         obj.type === "FeatureCollection" &&

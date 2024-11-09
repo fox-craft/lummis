@@ -22,13 +22,13 @@ import Typography from "@mui/material/Typography";
 
 
 export default function Dashboard() {
-    const {countyName, setProjects, projects} = useContext(FilterContext);
+    const {landscape, setProjects, projects} = useContext(FilterContext);
     var completedProjects = 0;
     var inprogressProjects = 0;
     var amountDisbursed = 0;
     var totalPopulation = 0;
 
-   const {data} = useProjectsQuery(countyName)
+   const {data} = useProjectsQuery(landscape)
 
     useEffect(() => {
         if (data) {
