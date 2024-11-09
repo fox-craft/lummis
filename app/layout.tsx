@@ -19,7 +19,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import {placeHolderItems} from './listItems';
 import ProSidebar from "@/app/components/menubar/ProSidebar";
-import SelectCounty from "@/app/components/SelectCounty";
+import LandscapeSelector from "@/app/components/filter/LandscapeSelector";
 import {FilterContext, FilterProvider} from "@/app/components/filter/FilterContext";
 import {QueryClient, QueryClientProvider, useQuery} from "@tanstack/react-query";
 import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
@@ -114,34 +114,34 @@ export default function RootLayout({
                 <FilterProvider>
                     <Box sx={{display: 'flex'}}>
                         <CssBaseline/>
-                        <AppBar position="absolute" open={open}>
-                            <Toolbar
-                                sx={{
-                                    pr: '24px', // keep right padding when drawer closed
-                                    bgcolor: '#347928'
-                                }}
-                            >
-                                <IconButton
-                                    edge="start"
-                                    color="inherit"
-                                    aria-label="open drawer"
-                                    onClick={toggleDrawer}
-                                    sx={{
-                                        marginRight: '36px',
-                                        ...(open && {display: 'none'}),
-                                    }}
-                                >
-                                    <MenuIcon/>
-                                </IconButton>
-                                <SelectCounty/>
-                                <IconButton color="inherit">
-                                    <Badge badgeContent={4} color="secondary">
-                                        <NotificationsIcon/>
-                                    </Badge>
-                                </IconButton>
-                            </Toolbar>
-                        </AppBar>
-                        <Drawer variant="permanent" open={open} sx={{bgcolor: '#FFFBE6'}}>
+                        {/*<AppBar position="absolute" open={open}>*/}
+                        {/*    <Toolbar*/}
+                        {/*        sx={{*/}
+                        {/*            pr: '24px', // keep right padding when drawer closed*/}
+                        {/*            bgcolor: '#347928'*/}
+                        {/*        }}*/}
+                        {/*    >*/}
+                        {/*        <IconButton*/}
+                        {/*            edge="start"*/}
+                        {/*            color="inherit"*/}
+                        {/*            aria-label="open drawer"*/}
+                        {/*            onClick={toggleDrawer}*/}
+                        {/*            sx={{*/}
+                        {/*                marginRight: '36px',*/}
+                        {/*                ...(open && {display: 'none'}),*/}
+                        {/*            }}*/}
+                        {/*        >*/}
+                        {/*            <MenuIcon/>*/}
+                        {/*        </IconButton>*/}
+                        {/*        <LandscapeSelector/>*/}
+                        {/*        <IconButton color="inherit">*/}
+                        {/*            <Badge badgeContent={4} color="secondary">*/}
+                        {/*                <NotificationsIcon/>*/}
+                        {/*            </Badge>*/}
+                        {/*        </IconButton>*/}
+                        {/*    </Toolbar>*/}
+                        {/*</AppBar>*/}
+                        <Drawer variant="permanent" open={open} sx={{bgcolor: '#8e7b12'}}>
                             <Toolbar
                                 sx={{
                                     display: 'flex',
@@ -173,12 +173,13 @@ export default function RootLayout({
                                     theme.palette.mode === 'light'
                                         ? theme.palette.grey[100]
                                         : theme.palette.grey[900],
+
                                 flexGrow: 1,
                                 height: '100vh',
-                                overflow: 'auto',
+                                overflow: 'hidden',
                             }}
                         >
-                            <Toolbar/>
+                            {/*<Toolbar/>*/}
                             {children}
                         </Box>
                     </Box>

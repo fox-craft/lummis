@@ -1,9 +1,17 @@
 import axios from "axios";
 import {useQuery} from "@tanstack/react-query";
-import dayjs from "dayjs";
+import {GeoJSON} from "geojson";
 
 const GEOSERVER_BASE_URL = process.env.GEOSERVER_BASE_URL
 const BACKEND_URL = 'http://localhost:8000'
+
+export type Landscape ={
+    id: number;
+    name: string;
+    counties: string[];
+}
+
+export type Landscapes = ReadonlyArray<Landscape>;
 
 export type Project = {
     id?: number;
@@ -96,6 +104,31 @@ const fetchProject = async (projectId: number): Promise<ProjectDetail> => {
     return response.data;
 };
 
+export const useParkAndReservesQuery =() => {
+    return useQuery<GeoJSON>({
+        queryKey: ['parks_reserves'],
+        queryFn: () => fetchParksAndReserves()
+    })
+}
+
+export const useConservanciesQuery =() => {
+    return useQuery<GeoJSON>({
+        queryKey: ['conservancies'],
+        queryFn: () => fetchConservancies()
+    })
+}
+
+const fetchParksAndReserves = async (): Promise<GeoJSON> => {
+   const url ="https://gist.githubusercontent.com/fox-craft/2dd93011bff3a12d5ad2f299e0ac3ce5/raw/99ef7abc2c76e7f9cd5fdc9bb91db67307aebcea/parks.geojson"
+    const response = await axios.get(url)
+    return response.data
+}
+
+const fetchConservancies = async (): Promise<GeoJSON> => {
+   const url ="https://gist.githubusercontent.com/fox-craft/65118c48982006f6b5028d70ffb7799a/raw/b2c29ef592df7962de871bc6452651bf58116595/conservancies.geojson"
+    const response = await axios.get(url)
+    return response.data
+}
 
 export const useProjectLocationsQuery = (countyName: string) => {
     return useQuery({

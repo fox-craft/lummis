@@ -1,33 +1,25 @@
 "use client";
 import React, {useEffect, useRef, useContext, useState} from "react";
 import * as L from "leaflet";
+import "leaflet-providers";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet.markercluster";
 import {FilterContext} from "@/app/components/filter/FilterContext";
 import {useQueryClient} from "@tanstack/react-query";
-import { useProjectLocationsQuery} from "@/app/components/helpers/api";
+import {useConservanciesQuery, useParkAndReservesQuery, useProjectLocationsQuery} from "@/app/components/helpers/api";
 import {isValidGeoJsonObject} from "@/app/components/helpers/utils";
 import {createRoot} from "react-dom/client";
 import {flushSync} from "react-dom";
 import FeaturePopup from "@/app/components/map/FeaturePopup";
-import {ModalPopup} from "@/app/components/map/ModalPopup";
 import InfoDrawer from "@/app/components/map/InfoDrawer";
+import {Feature, GeoJsonProperties, Geometry} from "geojson";
+import {Popover} from "@mui/material";
+import Typography from "@mui/material/Typography";
+import {MapPopup} from "@/app/components/map/MapPopup";
 
-const MAP_TILE = {
-    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-};
 
-const ESRI_IMAGERY = {
-    url: "http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    attribution:
-        "&copy; <a href='http://www.esri.com/'>Esri</a>, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
-    maxZoom: 18,
-};
-// const GEOSERVER_BASE_URL = process.env.GEOSERVER_BASE_URL
 const GEOSERVER_BASE_URL = 'http://localhost:8080/geoserver'
 const mapStyles: React.CSSProperties = {
     width: "100%",
@@ -49,40 +41,37 @@ function ProjectMap() {
     const mapRef = useRef<L.Map | null>(null);
     const layerControlRef = useRef<L.Control.Layers | null>(null);
     const timeseriesLGroup = useRef<L.LayerGroup | null>(null);
-    const {countyName, countyId, startDate, endDate, projects} = useContext(FilterContext);
+    const {landscape, landscapeId, startDate, endDate, projects} = useContext(FilterContext);
     const queryClient = useQueryClient()
     const [openPopup, setOpenPopup] = useState<boolean>(false)
-    const [selectedProject, setSelectedProject] = useState<number>()
+    const [featureProperties, setFeatureProperties] = useState<GeoJsonProperties>(null)
 
+    const {data: parks} = useParkAndReservesQuery()
+    const {data: conservancies} = useConservanciesQuery()
 
-    const {data} = useProjectLocationsQuery(countyName)
-
-    function getRandomInt(max: number) {
-        return Math.floor(Math.random() * max);
-    }
 
     useEffect(() => {
         if (typeof window !== 'undefined' && mapContainer.current && !mapRef.current) {
+
             mapRef.current = L.map(mapContainer.current).setView([0, 37], 5);
 
-            const osm = L.tileLayer(MAP_TILE.url);
-            const imagery = L.tileLayer(ESRI_IMAGERY.url);
-            const openTopoMap = L.tileLayer(
-                "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
-                {
-                    maxZoom: 19,
-                    attribution:
-                        "Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap (CC-BY-SA)",
-                }
-            );
+            const osm = L.tileLayer.provider('OpenStreetMap');
+            const openTopoMap = L.tileLayer.provider('OpenTopoMap');
+            const Stadia_StamenWatercolor = L.tileLayer.provider('Stadia.StamenWatercolor');
+            const Stadia_AlidadeSmooth = L.tileLayer.provider('Stadia.AlidadeSmooth');
+            // const Stadia_AlidadeSatellite = L.tileLayer.provider('Stadia.AlidadeSatellite');
+            const Stadia_StamenToner = L.tileLayer.provider('Stadia.StamenToner');
 
             const baseMaps = {
-                OpenStreetMap: osm,
-                "OpenStreetMap.HOT": imagery,
+                "Stadia StamenWatercolor": Stadia_StamenWatercolor,
+                "Stadia AlidadeSmooth": Stadia_AlidadeSmooth,
+                // "Stadia AlidadeSatellite": Stadia_AlidadeSatellite,
+                "Stadia StamenToner": Stadia_StamenToner,
+                "OpenStreetMap": osm,
                 "OpenTopo Map": openTopoMap,
             };
 
-            osm.addTo(mapRef.current);
+            Stadia_AlidadeSmooth.addTo(mapRef.current);
             layerControlRef.current = L.control.layers(baseMaps);
             layerControlRef.current.addTo(mapRef.current);
             timeseriesLGroup.current = L.layerGroup().addTo(mapRef.current);
@@ -97,20 +86,19 @@ function ProjectMap() {
     }, []);
 
     useEffect(() => { // Add and filter sub counties and projects layer
-        console.log(`Selected county changed ${countyName}`);
-        if (mapContainer.current && mapRef.current && countyName) {
+        console.log(`Selected county changed ${landscape}`);
+        if (mapContainer.current && mapRef.current && landscape) {
             const cql_filter = "CQL_FILTER: county='{0}'"
-            console.log("Updating WMS url date to " + countyName); //CQL_FILTER: county='Wajir'
-            // const wms_url = `${GEOSERVER_BASE_URL}/flloca/wms?CQL_FILTER=county=${countyName}`
+            console.log("Updating WMS url date to " + landscape);
             const wms_url = `${GEOSERVER_BASE_URL}/flloca/wms`
-            const projects_wms = countyName ? `${GEOSERVER_BASE_URL}/flloca/wms?CQL_FILTER=county=${countyName}` : `${GEOSERVER_BASE_URL}/timeseries/wms`
+            const projects_wms = landscape ? `${GEOSERVER_BASE_URL}/flloca/wms?CQL_FILTER=county=${landscape}` : `${GEOSERVER_BASE_URL}/timeseries/wms`
             const timeseries = L.tileLayer.wms(
                 wms_url,
                 {
                     layers: `flloca:ke_subcounty`,
                     format: "image/png",
                     transparent: true,
-                    styles:'subcounty_bycounty'
+                    styles: 'subcounty_bycounty'
                 }
             );
             timeseriesLGroup.current?.clearLayers();
@@ -119,98 +107,216 @@ function ProjectMap() {
             timeseriesLGroup.current.addTo(mapRef.current);
             layerControlRef.current?.addOverlay(timeseriesLGroup.current, 'Sub Counties');
         }
-    }, [countyName]);
+    }, [landscape]);
 
+    const conservanciesStyle = {
+        fillColor: '#F09319',
+        fillOpacity: 0.5,
+        weight: 2,
+        opacity: 1,
+        color: '#ffffff',
+        dashArray: '3'
+    }
+    const parksStyle = {
+        fillColor: '#3D5300',
+        fillOpacity: 0.5,
+        weight: 2,
+        opacity: 1,
+        color: '#ffffff',
+        dashArray: '3'
+    }
+    const defaultStyle = {
+        color: "blue",
+        weight: 2,
+        opacity: 1
+    };
 
-    const onEachProjectClick = (projectFeature: GeoJSON.Feature, layer: L.Layer) => {
-        setSelectedProject(getRandomInt(500))
-        console.log(`${projectFeature} clicked`)
+    const selectedStyle = {
+        color: "green",
+        fillColor: "yellow",
+        weight: 4,
+        opacity: 1
+    };
+
+    function zoomToFeature(e: any) {
+        mapRef.current?.fitBounds(e.target.getBounds());
+    }
+    const onFeatureClick = (projectFeature: Feature, layer: any) => {
         layer.on({
-            click: (event: any) => {
-                event.target.setStyle({
-                    color: "green",
-                    fillColor: "yellow"
-                });
-
-
-            }
-        })
+            // 'mouseover': highlightFeature,
+            "click": zoomToFeature,
+            // "mouseout": resetHighlight,
+        });
+        console.log(projectFeature);
         setOpenPopup(true);
         console.log(`Opening popup  ${openPopup}`)
-        // if (
-        //     projectFeature.properties &&
-        //     Object.keys(projectFeature.properties).length > 0
-        // ) {
-        // const popupOptions = {
-        //     minWidth: 100,
-        //     maxWidth: 250,
-        //     className: "popup-classname"
-        // };
-        // console.log('Opening popup')
-        // layer.bindPopup(() => {
-        //     const div = document.createElement("div");
-        //     const root = createRoot(div);
-        //     flushSync(() => {
-        //         root.render(
-        //             <FeaturePopup featureId={getRandomInt(500)}/>)
-        //     });
-        //     return div.innerHTML;
-        // }, popupOptions);
-        // }
-    }
-    var geojsonMarkerOptions = {
-        radius: 8,
-        fillColor: "#ff7800",
-        color: "#000",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8
-    };
-    const addGeoJsonLayer = (
-        geojson_data: GeoJSON.FeatureCollection,
-        layerGroup: L.LayerGroup
-    ) => {
-        if (isValidGeoJsonObject(geojson_data)) {
-            const geoJsonLayer = L.geoJSON(geojson_data, {
-                onEachFeature: (feature: GeoJSON.Feature, layer: L.Layer) => onEachProjectClick(feature, layer),
-                pointToLayer: (feature, latlng) =>
-                    L.circleMarker(latlng, geojsonMarkerOptions),
-            });
-            layerGroup.addLayer(geoJsonLayer);
+        if (
+            projectFeature.properties &&
+            Object.keys(projectFeature.properties).length > 0
+        ) {
+            setFeatureProperties(projectFeature.properties)
+            const popupOptions = {
+                minWidth: 100,
+                maxWidth: 250,
+                className: "popup-classname"
+            };
+            console.log('Opening popup')
+            layer.bindPopup(() => {
+                const div = document.createElement("div");
+                const root = createRoot(div);
+                flushSync(() => {
+                    root.render(
+                        <FeaturePopup properties={projectFeature.properties}/>)
+                });
+                return div.innerHTML;
+            }, popupOptions);
         }
-    };
+    }
 
+    const Tooltip = (event: any) => {
+        const [anchorEl, setAnchorEl] = React.useState(event);
+
+        const handleClose = () => {
+            setAnchorEl(null);
+        };
+        const open = Boolean(anchorEl);
+        const id = open ? 'simple-popover' : undefined;
+        return (
+            <>
+                <Popover
+                    id={id}
+                    open={open}
+                    anchorEl={anchorEl}
+                    onClose={handleClose}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                >
+                    <Typography sx={{ p: 2 }}>The content of the Popover.</Typography>
+                </Popover>
+            </>
+        )
+    }
+
+    const highlightFeature = (e: any) => {
+        var layer = e.target;
+
+        layer.setStyle({
+            weight: 5,
+            color: '#666',
+            dashArray: '',
+            fillOpacity: 0.7
+        });
+
+        layer.bringToFront();
+    }
+
+
+    // const resetHighlight= (l: GeoJSON.Feature, e: any)=> {
+    //     l.resetStyle(e.target);
+    // }
+    const getColor = (property: String) => {
+        return property == 'National Park' ? '#347928' :
+            property == 'National Reserve' ? '#C0EBA6' :
+                property == 'Marine National Park' ? '#FFFBE6' :
+                    property == 'Marine National Reserve' ? '#FCCD2A' :
+                        property == 'National Sanctuary' ? '#3D5300' :
+                            '#CA7373';
+    }
+
+    const onStyle = (feature: GeoJsonProperties) => {
+        // @ts-ignore
+        var designation = feature.properties.DESIG
+        return {
+            fillColor: getColor(designation),
+            weight: 2,
+            opacity: 1,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 0.7
+        }
+    }
     useEffect(() => {
-        if (mapRef.current && data) {
-            mapRef.current.eachLayer((layer) => {
-                if (
-                    layer instanceof L.GeoJSON
-                    // layer instanceof L.MarkerClusterGroup
-                ) {
-                    mapRef.current?.removeLayer(layer);
-                }
-            });
+        // if (mapRef.current && data) {
+        //     mapRef.current.eachLayer((layer) => {
+        //         if (
+        //             layer instanceof L.GeoJSON
+        //
+        //             // layer instanceof L.MarkerClusterGroup
+        //         ) {
+        //             mapRef.current?.removeLayer(layer);
+        //         }
+        //     });
+        //
+        //     const markerClusterGroup = L.featureGroup()
+        //     addGeoJsonLayer(data, markerClusterGroup);
+        //
+        //
+        //     mapRef.current.addLayer(markerClusterGroup);
+        //
+        //     const bounds = markerClusterGroup.getBounds();
+        //     if (bounds.isValid()) {
+        //         mapRef.current.fitBounds(bounds);
+        //     } else {
+        //         console.error("Invalid bounds, unable to fit the map to the data.");
+        //     }
+        // }
 
-            const markerClusterGroup = L.featureGroup()
-            addGeoJsonLayer(data, markerClusterGroup);
+        if (mapRef.current && parks) {
+
+            console.log(parks)
+            const layerGroup = L.featureGroup()
+            if (isValidGeoJsonObject(parks)) {
+                // @ts-ignore
+                const geoJsonLayer = L.geoJSON(parks, {
+                    //style: (feature) => onStyle(feature.properties),
+                    style: parksStyle,
+                    onEachFeature: (feature: Feature, layer: L.Layer) => onFeatureClick(feature, layer),
+                })
+                layerGroup.addLayer(geoJsonLayer);
+            }
 
 
-            mapRef.current.addLayer(markerClusterGroup);
-
-            const bounds = markerClusterGroup.getBounds();
+            mapRef.current.addLayer(layerGroup);
+            layerControlRef.current?.addOverlay(layerGroup, "Parks & Reserves").addTo(mapRef.current);
+            const bounds = layerGroup.getBounds();
             if (bounds.isValid()) {
                 mapRef.current.fitBounds(bounds);
             } else {
                 console.error("Invalid bounds, unable to fit the map to the data.");
             }
         }
-    }, [data]);
+    }, [parks]);
+
+    useEffect(() => {
+        if (mapRef.current && conservancies) {
+            const layerGroup = L.featureGroup()
+            if (isValidGeoJsonObject(conservancies)) {
+                const geoJsonLayer = L.geoJSON(conservancies, {
+                    style: conservanciesStyle,
+                    onEachFeature: (feature: Feature, layer: L.Layer) => onFeatureClick(feature, layer),
+                })
+                layerGroup.addLayer(geoJsonLayer);
+            }
+
+
+            mapRef.current.addLayer(layerGroup);
+            layerControlRef.current?.addOverlay(layerGroup, "Conservancies").addTo(mapRef.current);
+            const bounds = layerGroup.getBounds();
+            if (bounds.isValid()) {
+                mapRef.current.fitBounds(bounds);
+            } else {
+                console.error("Invalid bounds, unable to fit the map to the data.");
+            }
+        }
+    }, [conservancies]);
 
     return (
         <main>
             <div ref={mapContainer} style={mapStyles}/>
             {/*<TimeSeriesSlider onChangeCommit={handleSliderChangeCommitted} />*/}
-            {selectedProject && <InfoDrawer featureId={selectedProject} open={openPopup}/>}
+            {/*{featureProperties &&( <MapPopup modalOpen={openPopup} feature={featureProperties}/>)}*/}
         </main>
     );
 }
