@@ -8,9 +8,7 @@ import {Landscapes} from "@/app/components/helpers/api";
 
 export default function LandscapeSelector() {
     const {landscape, setLandscape, landscapeId, startDate, endDate} = useContext(FilterContext);
-    const [selectedCounty, setSelectedCounty] = useState<string>('')
-
-    const handleLandscapeChange = (event: SelectChangeEvent<string>) => {
+    const handleLandscapeChange = (event: SelectChangeEvent) => {
         setLandscape(event.target.value as string);
     };
 
@@ -24,7 +22,7 @@ export default function LandscapeSelector() {
                     value={landscape}
                     onChange={handleLandscapeChange}
                     variant='standard'
-                    size='small'
+                    size='medium'
                     id='_selected_landscape'
                 >
                     <MenuItem value=""><em>All</em></MenuItem>
