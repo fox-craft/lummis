@@ -1,38 +1,39 @@
 import GroupsIcon from "@mui/icons-material/Groups";
 import Paper from "@mui/material/Paper";
-import {InfoCard} from "@/app/components/dashboard/InfoCard";
+import {InfoCard} from "@/app/components/stats/InfoCard";
 import Grid from "@mui/material/Grid";
 import * as React from "react";
 import Card from "@mui/material/Card";
 import {Stack} from "@mui/material";
 import Typography from "@mui/material/Typography";
+import Divider from "@mui/material/Divider";
 
 const STATS_DATA = [
     {
         id: 1,
-        title: 'Target Beneficiaries',
-        number: 50300,
+        title: 'Members in Total',
+        number: 154,
         icon: GroupsIcon,
         color: 'cuaternary.main',
     },
     {
         id: 2,
-        title: 'People Reached',
-        number: 33300,
+        title: 'Community Conservancies',
+        number: 79,
         icon: GroupsIcon,
         color: 'tertiary.400',
     },
     {
         id: 3,
-        title: 'Active Interventions',
-        number: 150,
+        title: 'Group Conservancies',
+        number: 25,
         icon: GroupsIcon,
         color: 'secondary.main',
     },
     {
         id: 4,
-        title: 'Completed Interventions',
-        number: 300,
+        title: 'Private Conservancies',
+        number: 46,
         icon: GroupsIcon,
         color: 'success.main',
     }
@@ -42,27 +43,20 @@ export default function StatsSection() {
     return (
         <>
             <Grid container spacing={2}>
+                <Grid item>
+                    <Typography variant='h5'>Statistics</Typography>
+                </Grid>
                 {STATS_DATA.map((stat) => (
-                    <Grid item xs={12} sm={6} md={3} key={stat.id}>
-                        <Card sx={{height: '100px', p: '20px'}}>
-                            <Stack direction="row" spacing={1} alignItems="center">
-                                <GroupsIcon
-                                    sx={{
-                                        fontSize: 70,
-                                        color: stat.color,
-                                    }}
-                                    color="disabled"
-                                />
-                                <span>
-                                <Typography fontSize={30} variant="subtitle1">
+                    <Grid item key={stat.id}>
+                        <Card sx={{height: '100px', p: '20px', margin: '20px'}}>
+                                <Typography fontSize={24} variant="subtitle1">
                                     {stat.number.toLocaleString()}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
                                     {stat.title}
                                 </Typography>
-                                    </span>
-                            </Stack>
                         </Card>
+                        <Divider/>
                     </Grid>
                 ))}
             </Grid>

@@ -5,20 +5,17 @@ import ListItemText from '@mui/material/ListItemText';
 import ListSubheader from '@mui/material/ListSubheader';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import PeopleIcon from '@mui/icons-material/People';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import LayersIcon from '@mui/icons-material/Layers';
 import StarIcon from '@mui/icons-material/Star';
-import ChecklistIcon from '@mui/icons-material/Checklist';
 import SettingsIcon from '@mui/icons-material/Settings';
 import SupportIcon from '@mui/icons-material/Support';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MapIcon from '@mui/icons-material/Map';
 import GroupsIcon from '@mui/icons-material/Groups';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import {ListItem} from "@mui/material";
 import Link from "next/link";
+import Badge from '@mui/material/Badge';
 
 const LINKS = [
     {text: 'Dashboard', href: '/', icon: DashboardIcon},
@@ -85,6 +82,14 @@ export const secondaryListItems = (
 
 export const placeHolderItems = (
     <React.Fragment>
+        <ListItem>
+            <ListItemIcon>
+                <Badge badgeContent={4} color="secondary">
+                    <NotificationsIcon/>
+                </Badge>
+            </ListItemIcon>
+            <ListItemText primary='Notifications'/>
+        </ListItem>
         {PLACEHOLDER_LINKS.map(({text, icon: Icon}) => (
             <ListItem key={text} disablePadding>
                 <ListItemButton>

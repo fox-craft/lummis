@@ -8,16 +8,19 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet.markercluster";
 import {FilterContext} from "@/app/components/filter/FilterContext";
 import {useQueryClient} from "@tanstack/react-query";
-import {useConservanciesQuery, useParkAndReservesQuery, useProjectLocationsQuery} from "@/app/components/helpers/api";
+import {useConservanciesQuery, useParkAndReservesQuery,} from "@/app/components/helpers/api";
 import {isValidGeoJsonObject} from "@/app/components/helpers/utils";
 import {createRoot} from "react-dom/client";
 import {flushSync} from "react-dom";
 import FeaturePopup from "@/app/components/map/FeaturePopup";
 import InfoDrawer from "@/app/components/map/InfoDrawer";
 import {Feature, GeoJsonProperties, Geometry} from "geojson";
-import {Popover} from "@mui/material";
+import {Popover, SwipeableDrawer, useMediaQuery} from "@mui/material";
 import Typography from "@mui/material/Typography";
-import {MapPopup} from "@/app/components/map/MapPopup";
+import IconButton from "@mui/material/IconButton";
+import InfoIcon from "@mui/icons-material/Info";
+import SwapeableTopDrawer from "@/app/components/map/SwapeableTopDrawer";
+import {useTheme} from "@mui/material/styles";
 
 
 const GEOSERVER_BASE_URL = 'http://localhost:8080/geoserver'
@@ -36,6 +39,35 @@ const customMarkerIcon = new L.Icon({
     iconAnchor: [12, 41],
 });
 
+const conservanciesStyle = {
+    fillColor: '#F09319',
+    fillOpacity: 0.5,
+    weight: 2,
+    opacity: 1,
+    color: '#ffffff',
+    dashArray: '3'
+}
+const parksStyle = {
+    fillColor: '#3D5300',
+    fillOpacity: 0.5,
+    weight: 2,
+    opacity: 1,
+    color: '#ffffff',
+    dashArray: '3'
+}
+const defaultStyle = {
+    color: "blue",
+    weight: 2,
+    opacity: 1
+};
+
+const selectedStyle = {
+    color: "green",
+    fillColor: "yellow",
+    weight: 4,
+    opacity: 1
+};
+
 function ProjectMap() {
     const mapContainer = useRef<HTMLDivElement>(null);
     const mapRef = useRef<L.Map | null>(null);
@@ -43,8 +75,12 @@ function ProjectMap() {
     const timeseriesLGroup = useRef<L.LayerGroup | null>(null);
     const {landscape, landscapeId, startDate, endDate, projects} = useContext(FilterContext);
     const queryClient = useQueryClient()
-    const [openPopup, setOpenPopup] = useState<boolean>(false)
     const [featureProperties, setFeatureProperties] = useState<GeoJsonProperties>(null)
+    const [openPopup, setOpenPopup] = useState<boolean>(Boolean(featureProperties))
+    const theme = useTheme()
+
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+    const [infoOpen, setInfoOpen] = useState<boolean>(isMobile)
 
     const {data: parks} = useParkAndReservesQuery()
     const {data: conservancies} = useConservanciesQuery()
@@ -61,7 +97,7 @@ function ProjectMap() {
             const Stadia_AlidadeSmooth = L.tileLayer.provider('Stadia.AlidadeSmooth');
             // const Stadia_AlidadeSatellite = L.tileLayer.provider('Stadia.AlidadeSatellite');
             const Stadia_StamenToner = L.tileLayer.provider('Stadia.StamenToner');
-
+            //TODO better basemaps https://github.com/clavijojuan/L.switchBasemap?tab=readme-ov-file
             const baseMaps = {
                 "Stadia StamenWatercolor": Stadia_StamenWatercolor,
                 "Stadia AlidadeSmooth": Stadia_AlidadeSmooth,
@@ -73,7 +109,8 @@ function ProjectMap() {
 
             Stadia_AlidadeSmooth.addTo(mapRef.current);
             layerControlRef.current = L.control.layers(baseMaps);
-            layerControlRef.current.addTo(mapRef.current);
+            layerControlRef.current.setPosition('bottomleft')
+            layerControlRef.current.addTo(mapRef.current, );
             timeseriesLGroup.current = L.layerGroup().addTo(mapRef.current);
 
             return () => {
@@ -108,35 +145,6 @@ function ProjectMap() {
             layerControlRef.current?.addOverlay(timeseriesLGroup.current, 'Sub Counties');
         }
     }, [landscape]);
-
-    const conservanciesStyle = {
-        fillColor: '#F09319',
-        fillOpacity: 0.5,
-        weight: 2,
-        opacity: 1,
-        color: '#ffffff',
-        dashArray: '3'
-    }
-    const parksStyle = {
-        fillColor: '#3D5300',
-        fillOpacity: 0.5,
-        weight: 2,
-        opacity: 1,
-        color: '#ffffff',
-        dashArray: '3'
-    }
-    const defaultStyle = {
-        color: "blue",
-        weight: 2,
-        opacity: 1
-    };
-
-    const selectedStyle = {
-        color: "green",
-        fillColor: "yellow",
-        weight: 4,
-        opacity: 1
-    };
 
     function zoomToFeature(e: any) {
         mapRef.current?.fitBounds(e.target.getBounds());
@@ -193,7 +201,7 @@ function ProjectMap() {
                         horizontal: 'left',
                     }}
                 >
-                    <Typography sx={{ p: 2 }}>The content of the Popover.</Typography>
+                    <Typography sx={{p: 2}}>The content of the Popover.</Typography>
                 </Popover>
             </>
         )
@@ -202,14 +210,15 @@ function ProjectMap() {
     const highlightFeature = (e: any) => {
         var layer = e.target;
 
-        layer.setStyle({
-            weight: 5,
-            color: '#666',
-            dashArray: '',
-            fillOpacity: 0.7
-        });
+        // layer.setStyle({
+        //     weight: 5,
+        //     color: '#666',
+        //     dashArray: '',
+        //     fillOpacity: 0.7
+        // });
 
         layer.bringToFront();
+
     }
 
 
@@ -314,9 +323,15 @@ function ProjectMap() {
 
     return (
         <main>
+            <IconButton
+                style={{ position: 'fixed', right: 16, top: 16, zIndex: 1000 }}
+                onClick={() => setInfoOpen(!infoOpen)}
+            >
+                <InfoIcon/>
+            </IconButton>
             <div ref={mapContainer} style={mapStyles}/>
-            {/*<TimeSeriesSlider onChangeCommit={handleSliderChangeCommitted} />*/}
-            {/*{featureProperties &&( <MapPopup modalOpen={openPopup} feature={featureProperties}/>)}*/}
+            {infoOpen && (<InfoDrawer open={infoOpen}/>)}
+            {/*<SwapeableTopDrawer/>*/}
         </main>
     );
 }

@@ -1,14 +1,11 @@
 import React from "react";
-import {Menu, MenuItem, SubMenu} from 'react-pro-sidebar';
+import {Menu, MenuItem} from 'react-pro-sidebar';
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
-import ContactsOutlinedIcon from "@mui/icons-material/ContactsOutlined";
-import ReceiptOutlinedIcon from "@mui/icons-material/ReceiptOutlined";
-import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import {useMediaQuery} from "@mui/material";
 import {useTheme} from "@mui/material/styles";
-import {DashboardOutlined, GridViewRounded, MapRounded} from "@mui/icons-material";
-import MapIcon from "@mui/icons-material/Map";
+import EditIcon from '@mui/icons-material/Edit';
+import QueryBuilderIcon from '@mui/icons-material/QueryBuilder';
+import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import Link from "next/link";
 
 
@@ -25,9 +22,9 @@ const ProSidebar = () => {
             {/*    <MenuItem icon={<GridViewRounded/>} component={<Link href="/projects" />}>List</MenuItem>*/}
             {/*    <MenuItem icon={<MapRounded/>} component={<Link href="/projects/map" />}>Map</MenuItem>*/}
             {/*</SubMenu>*/}
-            <MenuItem icon={<MapIcon/>} component={<Link href="/map" />}>Map</MenuItem>
-            <MenuItem icon={<ContactsOutlinedIcon/>}>Contacts</MenuItem>
-            <MenuItem icon={<ReceiptOutlinedIcon/>}>Profile</MenuItem>
+            <MenuItem icon={<QueryBuilderIcon/>}>Filters</MenuItem>
+            <MenuItem icon={<QueryStatsIcon/>}>Analyse</MenuItem>
+            <MenuItem icon={<EditIcon/>}>Edit</MenuItem>
 
         </Menu>
     );
