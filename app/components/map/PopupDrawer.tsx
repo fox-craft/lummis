@@ -2,11 +2,28 @@ import Drawer from "@mui/material/Drawer";
 import Box from "@mui/material/Box";
 import {Stack} from "@mui/material";
 import {GeoJsonProperties} from "geojson";
+import React, {useContext} from "react";
+import {MapContext} from "@/app/components/filter/MapContext";
+import Typography from "@mui/material/Typography";
 
-export default function InfoDrawer({properties, open}: { properties: GeoJsonProperties, open: boolean }) {
+export default function PopupDrawer() {
+    const {selectedFeature, detailedPopupOpen} = useContext(MapContext);
+
+    const keys = () => {
+        if (selectedFeature) {
+            return Object.keys(selectedFeature.properties as { [key: string]: any });
+        }
+    }
+    const value = (key: string) => {
+        if (selectedFeature && selectedFeature.properties) {
+            return selectedFeature.properties[key]
+        } else {
+            return ''
+        }
+    }
     return (
         <Drawer
-            open={open}
+            open={detailedPopupOpen}
             anchor="right"
             style={{
                 position: "absolute",
@@ -26,10 +43,19 @@ export default function InfoDrawer({properties, open}: { properties: GeoJsonProp
             ModalProps={{keepMounted: true}}
             variant="permanent"
         >
-            {properties && (
+            {selectedFeature && (
                 <Box sx={{display: "flex", padding: 3}}>
-                    <Stack spacing={3}>
-                    </Stack>
+
+                    {Object.keys(selectedFeature.properties as {
+                        [key: string]: any
+                    }).map((key) => (
+                        <Stack direction='column' key={`stack-${key}`} spacing={0.5} pb={2} pt={0}>
+                            <Typography key={`title-${key}`} variant="subtitle2"><em>{key}</em></Typography>
+                            <Typography key={`value-${key}`} variant="body1" color="text.primary">
+                                {value(key)}
+                            </Typography>
+                        </Stack>
+                    ))}
                 </Box>
             )}
 

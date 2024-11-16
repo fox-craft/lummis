@@ -4,7 +4,7 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
-import {FilterProvider} from "@/app/components/filter/FilterContext";
+import {MapContextProvider} from "@/app/components/filter/MapContext";
 import LeftDrawer from "@/app/components/nav/LeftDrawer";
 import {Metadata} from "next";
 import ThemeRegistry from "@/app/components/ThemeRegistry/ThemeRegistry";
@@ -43,7 +43,7 @@ export default function RootLayout({
         <body suppressHydrationWarning={true}>
         <ThemeRegistry>
             <CssBaseline />
-            <FilterProvider>
+            <MapContextProvider>
                 <Box sx={{display: 'flex'}}>
                     <LeftDrawer/>
                     <Box
@@ -61,7 +61,7 @@ export default function RootLayout({
                         {children}
                     </Box>
                 </Box>
-            </FilterProvider>
+            </MapContextProvider>
         </ThemeRegistry>
         </body>
         </html>

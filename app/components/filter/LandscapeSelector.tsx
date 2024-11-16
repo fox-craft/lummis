@@ -2,12 +2,12 @@ import * as React from "react";
 import {useContext, useState} from "react";
 import {FormControl, InputLabel, Select, SelectChangeEvent} from "@mui/material";
 import {Grid, MenuItem} from "@mui/material";
-import {FilterContext} from "@/app/components/filter/FilterContext";
+import {MapContext} from "@/app/components/filter/MapContext";
 import {Landscapes} from "@/app/components/helpers/api";
 
 
 export default function LandscapeSelector() {
-    const {landscape, setLandscape, landscapeId, startDate, endDate} = useContext(FilterContext);
+    const {landscape, setLandscape, landscapeId, startDate, endDate} = useContext(MapContext);
     const handleLandscapeChange = (event: SelectChangeEvent) => {
         setLandscape(event.target.value as string);
     };

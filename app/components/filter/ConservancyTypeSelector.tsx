@@ -2,12 +2,12 @@ import * as React from "react";
 import {useContext} from "react";
 import {FormControl, InputLabel, Select, SelectChangeEvent} from "@mui/material";
 import {Grid, MenuItem} from "@mui/material";
-import {FilterContext} from "@/app/components/filter/FilterContext";
+import {MapContext} from "@/app/components/filter/MapContext";
 import {ConservancyType, ConservancyTypes} from "@/app/components/helpers/interfaces";
 
 
 export default function ConservancyTypeSelector() {
-    const {conservancyType, setConservancyType} = useContext(FilterContext);
+    const {conservancyType, setConservancyType} = useContext(MapContext);
     const handleValueChange = (event: SelectChangeEvent) => {
         setConservancyType(event.target.value as string);
     };

@@ -7,7 +7,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Title from './Title';
 import {useContext} from "react";
-import {FilterContext} from "@/app/components/filter/FilterContext";
+import {MapContext} from "@/app/components/filter/MapContext";
 
 // Generate Order Data
 function createData(

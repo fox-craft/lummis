@@ -6,7 +6,7 @@ import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet.markercluster";
-import {FilterContext} from "@/app/components/filter/FilterContext";
+import {MapContext} from "@/app/components/filter/MapContext";
 import {useQueryClient} from "@tanstack/react-query";
 import {useConservanciesQuery, useParkAndReservesQuery,} from "@/app/components/helpers/api";
 import {isValidGeoJsonObject} from "@/app/components/helpers/utils";
@@ -21,6 +21,8 @@ import IconButton from "@mui/material/IconButton";
 import InfoIcon from "@mui/icons-material/Info";
 import SwapeableTopDrawer from "@/app/components/map/SwapeableTopDrawer";
 import {useTheme} from "@mui/material/styles";
+import PopupDrawer from "@/app/components/map/PopupDrawer";
+import {json} from "node:stream/consumers";
 
 
 const GEOSERVER_BASE_URL = 'http://localhost:8080/geoserver'
@@ -73,18 +75,27 @@ function ProjectMap() {
     const mapRef = useRef<L.Map | null>(null);
     const layerControlRef = useRef<L.Control.Layers | null>(null);
     const timeseriesLGroup = useRef<L.LayerGroup | null>(null);
-    const {landscape, landscapeId, startDate, endDate, projects} = useContext(FilterContext);
+    const selectionRef = useRef<any>(null)
+    const {landscape, selectedFeature, setSelectedFeature, setDetailedPopupOpen} = useContext(MapContext);
     const queryClient = useQueryClient()
-    const [featureProperties, setFeatureProperties] = useState<GeoJsonProperties>(null)
-    const [openPopup, setOpenPopup] = useState<boolean>(Boolean(featureProperties))
+    const [openPopup, setOpenPopup] = useState<boolean>(false)
     const theme = useTheme()
 
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-    const [infoOpen, setInfoOpen] = useState<boolean>(isMobile)
+    const [infoOpen, setInfoOpen] = useState<boolean>(!isMobile)
 
     const {data: parks} = useParkAndReservesQuery()
     const {data: conservancies} = useConservanciesQuery()
 
+    const togglePopup = () => {
+        console.log(`Info Window is open ${infoOpen}`)
+        if (infoOpen) {
+            setInfoOpen(!infoOpen)
+            console.log(`Info Window is now open ${infoOpen}`)
+        }
+        setDetailedPopupOpen(true)
+        console.log(`Popup Window is ${infoOpen}`)
+    }
 
     useEffect(() => {
         if (typeof window !== 'undefined' && mapContainer.current && !mapRef.current) {
@@ -146,39 +157,48 @@ function ProjectMap() {
         }
     }, [landscape]);
 
-    function zoomToFeature(e: any) {
+    const zoomToFeature = (feature: Feature) => (e: any) => {
+        console.log('Toggling popup states')
+        togglePopup()
         mapRef.current?.fitBounds(e.target.getBounds());
     }
-    const onFeatureClick = (projectFeature: Feature, layer: any) => {
+    const onFeatureClick = (clickedFeature: Feature, layer: any) => {
         layer.on({
-            // 'mouseover': highlightFeature,
-            "click": zoomToFeature,
+            'mouseover': function (e: any){
+                // if (
+                //     clickedFeature.properties &&
+                //     Object.keys(clickedFeature.properties).length > 0
+                // ) {
+                //     const popupOptions = {
+                //         minWidth: 100,
+                //         maxWidth: 250,
+                //         className: "popup-classname"
+                //     };
+                //     layer.bindPopup(() => {
+                //         const div = document.createElement("div");
+                //         const root = createRoot(div);
+                //         flushSync(() => {
+                //             root.render(
+                //                 <FeaturePopup feature={clickedFeature}/>)
+                //         });
+                //         return div.innerHTML;
+                //     }, popupOptions);
+                // }
+            },
+            "click": function (e: any){
+                // if (selection) {
+                //     resetstyles()
+                // }
+
+                // e.target.setStyle(selectedStyle)
+                selectionRef.current = e.target
+                togglePopup()
+                setSelectedFeature(clickedFeature)
+                L.DomEvent.stopPropagation(e)
+            },
             // "mouseout": resetHighlight,
         });
-        console.log(projectFeature);
-        setOpenPopup(true);
-        console.log(`Opening popup  ${openPopup}`)
-        if (
-            projectFeature.properties &&
-            Object.keys(projectFeature.properties).length > 0
-        ) {
-            setFeatureProperties(projectFeature.properties)
-            const popupOptions = {
-                minWidth: 100,
-                maxWidth: 250,
-                className: "popup-classname"
-            };
-            console.log('Opening popup')
-            layer.bindPopup(() => {
-                const div = document.createElement("div");
-                const root = createRoot(div);
-                flushSync(() => {
-                    root.render(
-                        <FeaturePopup properties={projectFeature.properties}/>)
-                });
-                return div.innerHTML;
-            }, popupOptions);
-        }
+
     }
 
     const Tooltip = (event: any) => {
@@ -332,6 +352,7 @@ function ProjectMap() {
             <div ref={mapContainer} style={mapStyles}/>
             {infoOpen && (<InfoDrawer open={infoOpen}/>)}
             {/*<SwapeableTopDrawer/>*/}
+            {selectedFeature && (<PopupDrawer/>)}
         </main>
     );
 }

@@ -7,7 +7,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Title from './Title';
 import {useContext} from "react";
-import {FilterContext} from "@/app/components/filter/FilterContext";
+import {MapContext} from "@/app/components/filter/MapContext";
 import dayjs from "dayjs";
 import {useProjectsQuery} from "@/app/components/helpers/api";
 
@@ -64,7 +64,7 @@ function preventDefault(event: React.MouseEvent) {
 }
 
 export default function Projects() {
-    const {landscape} = useContext(FilterContext)
+    const {landscape} = useContext(MapContext)
     const {data} = useProjectsQuery(landscape)
 
     const recent_projects = () =>  {

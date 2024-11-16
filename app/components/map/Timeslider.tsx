@@ -13,7 +13,7 @@ import {
     SkipNextRounded,
     SkipPreviousOutlined
 } from "@mui/icons-material";
-import {FilterContext} from "@/app/components/filter/FilterContext";
+import {MapContext} from "@/app/components/filter/MapContext";
 
 interface TimeSeriesSliderProps {
     onChangeCommit: (
@@ -25,7 +25,7 @@ interface TimeSeriesSliderProps {
 const TimeSeriesSlider: React.FC<TimeSeriesSliderProps> = ({
                                                                onChangeCommit,
                                                            }) => {
-    const {startDate, endDate,} = useContext(FilterContext);
+    const {startDate, endDate,} = useContext(MapContext);
     const [sliderValue, setSliderValue] = useState<number>(0);
     const [marks, setMarks] = useState<
         { value: number; label: string; fullLabel: string }[]

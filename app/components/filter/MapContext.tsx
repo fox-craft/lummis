@@ -1,6 +1,9 @@
 "use client";
 import {createContext, useState, ReactNode} from "react";
 import {Dayjs} from "dayjs";
+import {Feature, GeoJsonProperties, Geometry} from "geojson";
+import FeaturePopup from "@/app/components/map/FeaturePopup";
+import {any} from "prop-types";
 
 interface MapContextType {
     landscape: string | '';
@@ -8,25 +11,28 @@ interface MapContextType {
     landscapeId: number;
     startDate: Dayjs | null;
     endDate: Dayjs | null;
-    projects: any,
-    beneficiaries: any,
+    projects: any;
+    selectedFeature: Feature | null;
+    detailedPopupOpen: boolean;
     setStartDate: (date: Dayjs | null) => void;
     setEndDate: (date: Dayjs | null) => void;
     setLandscape: (landscape: string) => void;
     setConservancyType: (conservancyType: string) => void;
     setLandscapeId: (id: number) => void;
     setProjects: (projects: any | null) => void;
-    setBeneficiaries: (beneficiaries: any | null) => void;
+    setSelectedFeature: (selectedFeature: Feature | null) => void;
+    setDetailedPopupOpen: (detailedPopupOpen: boolean) => void;
 }
 
-export const FilterContext = createContext<MapContextType>({
+export const MapContext = createContext<MapContextType>({
+    detailedPopupOpen: false,
     startDate: null,
     endDate: null,
     landscapeId: 0,
     landscape: '',
     conservancyType: '',
     projects: null,
-    beneficiaries: null,
+    selectedFeature: null,
     setStartDate: () => {
     },
     setEndDate: () => {
@@ -36,39 +42,43 @@ export const FilterContext = createContext<MapContextType>({
     setLandscapeId: () => {
     },
     setProjects: () => {},
-    setBeneficiaries: () => {},
-    setConservancyType: () => {}
+    setSelectedFeature: () => {},
+    setConservancyType: () => {},
+    setDetailedPopupOpen: () => void {},
 
 });
 
-export const FilterProvider = ({children}: { children: ReactNode }) => {
+export const MapContextProvider = ({children}: { children: ReactNode }) => {
     const [startDate, setStartDate] = useState<Dayjs | null>(null);
     const [endDate, setEndDate] = useState<Dayjs | null>(null);
     const [landscape, setLandscape] = useState<string>('')
+    const [detailedPopupOpen, setDetailedPopupOpen] = useState<boolean>(false)
     const [conservancyType, setConservancyType] = useState<string>('')
     const [landscapeId, setLandscapeId] = useState<number>(0)
     const [projects, setProjects] = useState<any>(null)
-    const [beneficiaries, setBeneficiaries] = useState<any>(null)
+    const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null)
     return (
-        <FilterContext.Provider
+        <MapContext.Provider
             value={{
+                detailedPopupOpen: detailedPopupOpen,
                 landscape: landscape,
                 conservancyType: conservancyType,
                 landscapeId: landscapeId,
                 startDate: startDate,
                 endDate: endDate,
                 projects: projects,
-                beneficiaries: beneficiaries,
+                selectedFeature: selectedFeature,
                 setStartDate,
                 setEndDate,
                 setLandscape: setLandscape,
                 setLandscapeId: setLandscapeId,
-                setProjects,
-                setBeneficiaries,
-                setConservancyType
+                setProjects: setProjects,
+                setSelectedFeature: setSelectedFeature,
+                setConservancyType: setConservancyType,
+                setDetailedPopupOpen: setDetailedPopupOpen
             }}
         >
             {children}
-        </FilterContext.Provider>
+        </MapContext.Provider>
     );
 };
