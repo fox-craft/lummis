@@ -6,6 +6,7 @@ import FeaturePopup from "@/app/components/map/FeaturePopup";
 import {any} from "prop-types";
 
 interface MapContextType {
+    county: string | '';
     landscape: string | '';
     conservancyType: string | '';
     landscapeId: number;
@@ -14,6 +15,7 @@ interface MapContextType {
     projects: any;
     selectedFeature: Feature | null;
     detailedPopupOpen: boolean;
+    setCounty: (county: string) => void;
     setStartDate: (date: Dayjs | null) => void;
     setEndDate: (date: Dayjs | null) => void;
     setLandscape: (landscape: string) => void;
@@ -25,6 +27,7 @@ interface MapContextType {
 }
 
 export const MapContext = createContext<MapContextType>({
+    county: '',
     detailedPopupOpen: false,
     startDate: null,
     endDate: null,
@@ -33,6 +36,7 @@ export const MapContext = createContext<MapContextType>({
     conservancyType: '',
     projects: null,
     selectedFeature: null,
+    setCounty: () => {},
     setStartDate: () => {
     },
     setEndDate: () => {
@@ -52,6 +56,7 @@ export const MapContextProvider = ({children}: { children: ReactNode }) => {
     const [startDate, setStartDate] = useState<Dayjs | null>(null);
     const [endDate, setEndDate] = useState<Dayjs | null>(null);
     const [landscape, setLandscape] = useState<string>('')
+    const [county, setCounty] = useState<string>('')
     const [detailedPopupOpen, setDetailedPopupOpen] = useState<boolean>(false)
     const [conservancyType, setConservancyType] = useState<string>('')
     const [landscapeId, setLandscapeId] = useState<number>(0)
@@ -60,6 +65,7 @@ export const MapContextProvider = ({children}: { children: ReactNode }) => {
     return (
         <MapContext.Provider
             value={{
+                county: county,
                 detailedPopupOpen: detailedPopupOpen,
                 landscape: landscape,
                 conservancyType: conservancyType,
@@ -68,6 +74,7 @@ export const MapContextProvider = ({children}: { children: ReactNode }) => {
                 endDate: endDate,
                 projects: projects,
                 selectedFeature: selectedFeature,
+                setCounty,
                 setStartDate,
                 setEndDate,
                 setLandscape: setLandscape,
