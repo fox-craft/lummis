@@ -1,9 +1,10 @@
 import React from "react";
-import {Grid, SwipeableDrawer} from "@mui/material";
+import {Grid, Stack, SwipeableDrawer} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import LandscapeSelector from "@/app/components/filter/LandscapeSelector";
 import ConservancyTypeSelector from "@/app/components/filter/ConservancyTypeSelector";
+import CountySelector from "@/app/components/filter/CountySelector";
 
 export default function SwapeableTopDrawer () {
     const [open, setOpen] = React.useState(true);
@@ -42,23 +43,16 @@ export default function SwapeableTopDrawer () {
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "flex-start",
+                        bgcolor: 'beige'
                     }
                 }}
             >
-                <Box
-                    sx ={{width: '33%', height: '100px', bgcolor: 'background.paper'}}
-                    role='presentation'
-                    onClick={toggleDrawer}
-                >
-                    <Grid container spacing={2}>
-                        <Grid direction='row' item >
-                            <LandscapeSelector/>
-                        </Grid>
-                        <Grid direction='row' item >
-                            <ConservancyTypeSelector/>
-                        </Grid>
-                    </Grid>
-                </Box>
+
+                <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                    <CountySelector/>
+                    <LandscapeSelector/>
+                    <ConservancyTypeSelector/>
+                </Stack>
 
             </SwipeableDrawer>
 

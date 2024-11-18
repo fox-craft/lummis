@@ -15,7 +15,7 @@ export default function ConservancyTypeSelector() {
     return (
         <Grid sx={{flexGrow: 1}}>
             <FormControl size="small" variant='standard' sx={{flexGrow: 1, m: 1, minWidth: 120}}>
-                <InputLabel>Select Landscape</InputLabel>
+                <InputLabel>Conservancy Type</InputLabel>
                 <Select
                     autoWidth
                     label="Conservancy Type"

@@ -1,5 +1,5 @@
 "use client";
-import React, {useEffect, useRef, useContext, useState} from "react";
+import React, {useContext, useEffect, useRef, useState} from "react";
 import * as L from "leaflet";
 import "leaflet-providers";
 import "leaflet/dist/leaflet.css";
@@ -14,15 +14,13 @@ import {createRoot} from "react-dom/client";
 import {flushSync} from "react-dom";
 import FeaturePopup from "@/app/components/map/FeaturePopup";
 import InfoDrawer from "@/app/components/map/InfoDrawer";
-import {Feature, GeoJsonProperties, Geometry} from "geojson";
-import {Popover, SwipeableDrawer, useMediaQuery} from "@mui/material";
+import {Feature, GeoJsonProperties} from "geojson";
+import {Popover, useMediaQuery} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import InfoIcon from "@mui/icons-material/Info";
-import SwapeableTopDrawer from "@/app/components/map/SwapeableTopDrawer";
 import {useTheme} from "@mui/material/styles";
-import PopupDrawer from "@/app/components/map/PopupDrawer";
-import {json} from "node:stream/consumers";
+import SwapeableTopDrawer from "@/app/components/map/SwapeableTopDrawer";
 
 
 const GEOSERVER_BASE_URL = 'http://localhost:8080/geoserver'
@@ -76,7 +74,7 @@ function ProjectMap() {
     const layerControlRef = useRef<L.Control.Layers | null>(null);
     const timeseriesLGroup = useRef<L.LayerGroup | null>(null);
     const selectionRef = useRef<any>(null)
-    const {landscape, selectedFeature, setSelectedFeature, setDetailedPopupOpen} = useContext(MapContext);
+    const {landscape, selectedFeature, setSelectedFeature, setDetailedPopupOpen, county} = useContext(MapContext);
     const queryClient = useQueryClient()
     const [openPopup, setOpenPopup] = useState<boolean>(false)
     const theme = useTheme()
@@ -121,7 +119,7 @@ function ProjectMap() {
             Stadia_AlidadeSmooth.addTo(mapRef.current);
             layerControlRef.current = L.control.layers(baseMaps);
             layerControlRef.current.setPosition('bottomleft')
-            layerControlRef.current.addTo(mapRef.current, );
+            layerControlRef.current.addTo(mapRef.current,);
             timeseriesLGroup.current = L.layerGroup().addTo(mapRef.current);
 
             return () => {
@@ -164,28 +162,10 @@ function ProjectMap() {
     }
     const onFeatureClick = (clickedFeature: Feature, layer: any) => {
         layer.on({
-            'mouseover': function (e: any){
-                // if (
-                //     clickedFeature.properties &&
-                //     Object.keys(clickedFeature.properties).length > 0
-                // ) {
-                //     const popupOptions = {
-                //         minWidth: 100,
-                //         maxWidth: 250,
-                //         className: "popup-classname"
-                //     };
-                //     layer.bindPopup(() => {
-                //         const div = document.createElement("div");
-                //         const root = createRoot(div);
-                //         flushSync(() => {
-                //             root.render(
-                //                 <FeaturePopup feature={clickedFeature}/>)
-                //         });
-                //         return div.innerHTML;
-                //     }, popupOptions);
-                // }
+            'mouseover': function (e: any) {
+
             },
-            "click": function (e: any){
+            "click": function (e: any) {
                 // if (selection) {
                 //     resetstyles()
                 // }
@@ -195,6 +175,26 @@ function ProjectMap() {
                 togglePopup()
                 setSelectedFeature(clickedFeature)
                 L.DomEvent.stopPropagation(e)
+
+                if (
+                    clickedFeature.properties &&
+                    Object.keys(clickedFeature.properties).length > 0
+                ) {
+                    const popupOptions = {
+                        minWidth: 100,
+                        maxWidth: 250,
+                        className: "popup-classname"
+                    };
+                    layer.bindPopup(() => {
+                        const div = document.createElement("div");
+                        const root = createRoot(div);
+                        flushSync(() => {
+                            root.render(
+                                <FeaturePopup feature={clickedFeature}/>)
+                        });
+                        return div.innerHTML;
+                    }, popupOptions);
+                }
             },
             // "mouseout": resetHighlight,
         });
@@ -317,19 +317,38 @@ function ProjectMap() {
             }
         }
     }, [parks]);
+    const filterGeojson = (county: string, feature: Feature) => {
+        return feature && feature.properties ? feature.properties['COUNTY'] === county : false
+    }
 
     useEffect(() => {
-        if (mapRef.current && conservancies) {
-            const layerGroup = L.featureGroup()
-            if (isValidGeoJsonObject(conservancies)) {
-                const geoJsonLayer = L.geoJSON(conservancies, {
-                    style: conservanciesStyle,
-                    onEachFeature: (feature: Feature, layer: L.Layer) => onFeatureClick(feature, layer),
-                })
-                layerGroup.addLayer(geoJsonLayer);
+        if (mapRef.current) {
+            var layerGroup = L.featureGroup()
+            var  geoJsonLayer = L.geoJSON();
+            if (conservancies && county) {
+                console.log(`County is selected ${county}`);
+                // Define a filter function to include only features with a specific property
+                //const filterByType = (feature: Feature) => feature.properties.county === county;
+
+                // Create the filtered GeoJSON layer
+
+                if (isValidGeoJsonObject(conservancies)) {
+                    geoJsonLayer = L.geoJSON(conservancies, {
+                        filter: (feature: Feature) => filterGeojson(county, feature),
+                        onEachFeature: (feature: Feature, layer: L.Layer) => onFeatureClick(feature, layer)
+                    });
+                }
+            } else if (conservancies) {
+
+                if (isValidGeoJsonObject(conservancies)) {
+                    geoJsonLayer = L.geoJSON(conservancies, {
+                        style: conservanciesStyle,
+                        onEachFeature: (feature: Feature, layer: L.Layer) => onFeatureClick(feature, layer),
+                    })
+
+                }
             }
-
-
+            layerGroup.addLayer(geoJsonLayer);
             mapRef.current.addLayer(layerGroup);
             layerControlRef.current?.addOverlay(layerGroup, "Conservancies").addTo(mapRef.current);
             const bounds = layerGroup.getBounds();
@@ -338,21 +357,23 @@ function ProjectMap() {
             } else {
                 console.error("Invalid bounds, unable to fit the map to the data.");
             }
+
         }
-    }, [conservancies]);
+
+    }, [conservancies, county]);
 
     return (
         <main>
             <IconButton
-                style={{ position: 'fixed', right: 16, top: 16, zIndex: 1000 }}
+                style={{position: 'fixed', right: 16, top: 16, zIndex: 1000}}
                 onClick={() => setInfoOpen(!infoOpen)}
             >
                 <InfoIcon/>
             </IconButton>
             <div ref={mapContainer} style={mapStyles}/>
             {infoOpen && (<InfoDrawer open={infoOpen}/>)}
-            {/*<SwapeableTopDrawer/>*/}
-            {selectedFeature && (<PopupDrawer/>)}
+            <SwapeableTopDrawer/>
+            {/*{selectedFeature && (<PopupDrawer/>)}*/}
         </main>
     );
 }

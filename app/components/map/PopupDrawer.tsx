@@ -5,6 +5,7 @@ import {GeoJsonProperties} from "geojson";
 import React, {useContext} from "react";
 import {MapContext} from "@/app/components/filter/MapContext";
 import Typography from "@mui/material/Typography";
+import FeaturePopup from "@/app/components/map/FeaturePopup";
 
 export default function PopupDrawer() {
     const {selectedFeature, detailedPopupOpen} = useContext(MapContext);
@@ -14,6 +15,7 @@ export default function PopupDrawer() {
             return Object.keys(selectedFeature.properties as { [key: string]: any });
         }
     }
+
     const value = (key: string) => {
         if (selectedFeature && selectedFeature.properties) {
             return selectedFeature.properties[key]
@@ -30,6 +32,7 @@ export default function PopupDrawer() {
             }}
             sx={{
                 width: 350,
+                mr: '16px',
                 flexShrink: 0,
                 '& .MuiDrawer-paper': {
                     width: 350,
@@ -37,27 +40,12 @@ export default function PopupDrawer() {
                     top: ['48px', '56px', '64px', ''],
                     height: 'auto',
                     bottom: 0,
-                    borderRadius: '16px'
+                    borderRadius: '16px',
+                    bgcolor: '#88C273',
                 },
             }}
             ModalProps={{keepMounted: true}}
             variant="permanent"
         >
-            {selectedFeature && (
-                <Box sx={{display: "flex", padding: 3}}>
-
-                    {Object.keys(selectedFeature.properties as {
-                        [key: string]: any
-                    }).map((key) => (
-                        <Stack direction='column' key={`stack-${key}`} spacing={0.5} pb={2} pt={0}>
-                            <Typography key={`title-${key}`} variant="subtitle2"><em>{key}</em></Typography>
-                            <Typography key={`value-${key}`} variant="body1" color="text.primary">
-                                {value(key)}
-                            </Typography>
-                        </Stack>
-                    ))}
-                </Box>
-            )}
-
         </Drawer>)
 }
