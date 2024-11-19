@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useContext, useState} from "react";
+import {useContext} from "react";
 import {FormControl, InputLabel, Select, SelectChangeEvent} from "@mui/material";
 import {Grid, MenuItem} from "@mui/material";
 import {MapContext} from "@/app/components/filter/MapContext";
@@ -13,7 +13,18 @@ export default function CountySelector() {
 
     return (
         <Grid sx={{flexGrow: 1}}>
-            <FormControl size="small" variant='standard' sx={{flexGrow: 1, m: 1, minWidth: 120}}>
+            <FormControl
+                size="small"
+                variant='standard'
+                sx=
+                    {
+                        {
+                            flexGrow: 1,
+                            m: 1,
+                            minWidth: 120
+                        }
+                    }
+            >
                 <InputLabel>Select County</InputLabel>
                 <Select
                     autoWidth

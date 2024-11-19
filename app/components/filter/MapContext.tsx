@@ -15,6 +15,7 @@ interface MapContextType {
     projects: any;
     selectedFeature: Feature | null;
     detailedPopupOpen: boolean;
+    filterOpen: boolean;
     setCounty: (county: string) => void;
     setStartDate: (date: Dayjs | null) => void;
     setEndDate: (date: Dayjs | null) => void;
@@ -24,6 +25,7 @@ interface MapContextType {
     setProjects: (projects: any | null) => void;
     setSelectedFeature: (selectedFeature: Feature | null) => void;
     setDetailedPopupOpen: (detailedPopupOpen: boolean) => void;
+    setFilterOpen: (filterOpen: boolean) => void;
 }
 
 export const MapContext = createContext<MapContextType>({
@@ -36,6 +38,8 @@ export const MapContext = createContext<MapContextType>({
     conservancyType: '',
     projects: null,
     selectedFeature: null,
+    filterOpen: false,
+    setFilterOpen: () => {},
     setCounty: () => {},
     setStartDate: () => {
     },
@@ -62,6 +66,7 @@ export const MapContextProvider = ({children}: { children: ReactNode }) => {
     const [landscapeId, setLandscapeId] = useState<number>(0)
     const [projects, setProjects] = useState<any>(null)
     const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null)
+    const [filterOpen, setFilterOpen] = useState<boolean>(false)
     return (
         <MapContext.Provider
             value={{
@@ -74,7 +79,9 @@ export const MapContextProvider = ({children}: { children: ReactNode }) => {
                 endDate: endDate,
                 projects: projects,
                 selectedFeature: selectedFeature,
-                setCounty,
+                filterOpen: filterOpen,
+                setFilterOpen: setFilterOpen,
+                setCounty: setCounty,
                 setStartDate,
                 setEndDate,
                 setLandscape: setLandscape,

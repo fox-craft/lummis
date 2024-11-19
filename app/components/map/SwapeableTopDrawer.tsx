@@ -1,13 +1,14 @@
-import React from "react";
+import React, {useContext} from "react";
 import {Grid, Stack, SwipeableDrawer} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import LandscapeSelector from "@/app/components/filter/LandscapeSelector";
 import ConservancyTypeSelector from "@/app/components/filter/ConservancyTypeSelector";
 import CountySelector from "@/app/components/filter/CountySelector";
+import {MapContext} from "@/app/components/filter/MapContext";
 
 export default function SwapeableTopDrawer () {
-    const [open, setOpen] = React.useState(true);
+    const {filterOpen, setFilterOpen} = useContext(MapContext);
     const toggleDrawer = () => (event: any) => {
         if (
             event &&
@@ -17,7 +18,7 @@ export default function SwapeableTopDrawer () {
             return;
         }
 
-        setOpen(!open);
+        setFilterOpen(!filterOpen);
     };
     return (
         <React.Fragment>
@@ -25,8 +26,8 @@ export default function SwapeableTopDrawer () {
                 onOpen={toggleDrawer()}
                 onClose={toggleDrawer()}
                 anchor={'top'}
-                variant="persistent"
-                open={open}
+                variant="temporary"
+                open={filterOpen}
                 ModalProps={{
                     keepMounted: true,
                 }}
@@ -35,28 +36,25 @@ export default function SwapeableTopDrawer () {
                 }}
                 PaperProps={{
                     sx: {
+                        flexGrow: 1,
                         width: '33%',
-                        height: '100px',
+                        // height: '100px',
                         mt: '16px',
                         ml: '30%',
                         borderRadius: '16px',
-                        display: "flex",
+                        // display: "flex",
                         justifyContent: "center",
-                        alignItems: "flex-start",
+                        alignItems: "center",
                         bgcolor: 'beige'
                     }
                 }}
             >
-
                 <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
                     <CountySelector/>
                     <LandscapeSelector/>
-                    <ConservancyTypeSelector/>
+                    {/*<ConservancyTypeSelector/>*/}
                 </Stack>
-
             </SwipeableDrawer>
-
-
         </React.Fragment>
     )
 }
