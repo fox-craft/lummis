@@ -121,6 +121,29 @@ function ProjectMap() {
             layerControlRef.current.addTo(mapRef.current,);
             timeseriesLGroup.current = L.layerGroup().addTo(mapRef.current);
 
+            const legend = new L.Control({position: 'bottomleft'});
+            // return property == 'National Park' ? '#347928' :
+            //     property == 'National Reserve' ? '#C0EBA6' :
+            //         property == 'Marine National Park' ? '#FFFBE6' :
+            //             property == 'Marine National Reserve' ? '#FCCD2A' :
+            //                 property == 'National Sanctuary' ? '#3D5300' :
+            //                     '#CA7373';
+
+            legend.onAdd = () => {
+                const div = L.DomUtil.create('div', 'info legend');
+                div.innerHTML += '<b>Parks & Reserves</b><br>';
+                div.innerHTML += '<i style="background: #347928"></i> National Park<br>';
+                div.innerHTML += '<i style="background: #C0EBA6"></i> National Reserve<br>';
+                div.innerHTML += '<i style="background: #FFFBE6"></i> Marine National Park<br>';
+                div.innerHTML += '<i style="background: #FCCD2A"></i> Marine National Reserve<br>';
+                div.innerHTML += '<i style="background: #3D5300"></i> National Sanctuary<br>';
+                div.innerHTML += '<br/><b>Conservancies</b><br>';
+                div.innerHTML += '<i style="background: #F09319"></i> Conservancy<br>';
+                return div;
+            };
+
+            mapRef.current?.addControl(legend);
+
             return () => {
                 if (mapRef.current) {
                     mapRef.current.remove();
@@ -152,7 +175,7 @@ function ProjectMap() {
             timeseriesLGroup.current.addTo(mapRef.current);
             layerControlRef.current?.addOverlay(timeseriesLGroup.current, 'Sub Counties');
         }
-    }, [landscape]);
+    }, []);
 
     const zoomToFeature = (feature: Feature) => (e: any) => {
         console.log('Toggling popup states')
@@ -266,30 +289,6 @@ function ProjectMap() {
         }
     }
     useEffect(() => {
-        // if (mapRef.current && data) {
-        //     mapRef.current.eachLayer((layer) => {
-        //         if (
-        //             layer instanceof L.GeoJSON
-        //
-        //             // layer instanceof L.MarkerClusterGroup
-        //         ) {
-        //             mapRef.current?.removeLayer(layer);
-        //         }
-        //     });
-        //
-        //     const markerClusterGroup = L.featureGroup()
-        //     addGeoJsonLayer(data, markerClusterGroup);
-        //
-        //
-        //     mapRef.current.addLayer(markerClusterGroup);
-        //
-        //     const bounds = markerClusterGroup.getBounds();
-        //     if (bounds.isValid()) {
-        //         mapRef.current.fitBounds(bounds);
-        //     } else {
-        //         console.error("Invalid bounds, unable to fit the map to the data.");
-        //     }
-        // }
 
         if (mapRef.current && parks) {
 
