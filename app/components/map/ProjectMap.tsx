@@ -67,7 +67,6 @@ const selectedStyle = {
     weight: 4,
     opacity: 1
 };
-
 function ProjectMap() {
     const mapContainer = useRef<HTMLDivElement>(null);
     const mapRef = useRef<L.Map | null>(null);
@@ -97,7 +96,7 @@ function ProjectMap() {
 
     useEffect(() => {
         if (typeof window !== 'undefined' && mapContainer.current && !mapRef.current) {
-
+            setInfoOpen(!isMobile)
             mapRef.current = L.map(mapContainer.current).setView([0, 37], 5);
 
             const osm = L.tileLayer.provider('OpenStreetMap');

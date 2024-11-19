@@ -1,5 +1,5 @@
 'use client'
-import {styled} from "@mui/material/styles";
+import {styled, useTheme} from "@mui/material/styles";
 import MuiDrawer from "@mui/material/Drawer";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -10,6 +10,7 @@ import ProSidebar from "@/app/components/nav/ProSidebar";
 import List from "@mui/material/List";
 import {placeHolderItems} from "@/app/listItems";
 import * as React from "react";
+import {useMediaQuery} from "@mui/material";
 
 const drawerWidth: number = 240;
 
@@ -40,7 +41,10 @@ const Drawer = styled(MuiDrawer, {shouldForwardProp: (prop) => prop !== 'open'})
 );
 
 export default function LeftDrawer() {
-    const [open, setOpen] = React.useState(true);
+    const theme = useTheme()
+
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+    const [open, setOpen] = React.useState(!isMobile);
     const toggleDrawer = () => {
         setOpen(!open);
     };

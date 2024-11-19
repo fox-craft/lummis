@@ -7,7 +7,7 @@ import {Landscapes} from "@/app/components/helpers/api";
 
 
 export default function LandscapeSelector() {
-    const {landscape, setLandscape, landscapeId, startDate, endDate} = useContext(MapContext);
+    const {landscape, setLandscape} = useContext(MapContext);
     const handleLandscapeChange = (event: SelectChangeEvent) => {
         setLandscape(event.target.value as string);
     };
