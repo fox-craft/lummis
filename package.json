@@ -20,6 +20,7 @@
     "@types/leaflet-providers": "^1.2.4",
     "axios": "^1.7.4",
     "dayjs": "^1.11.13",
+    "fs": "^0.0.1-security",
     "leaflet": "^1.9.4",
     "leaflet-providers": "^2.0.0",
     "leaflet-switch-basemap": "^1.0.6",

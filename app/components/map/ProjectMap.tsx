@@ -21,9 +21,10 @@ import IconButton from "@mui/material/IconButton";
 import InfoIcon from "@mui/icons-material/Info";
 import SwapeableTopDrawer from "@/app/components/map/SwapeableTopDrawer";
 import {useTheme} from "@mui/material/styles";
+import {use_kobo_data} from "@/app/components/kobo/data-loader";
 
 
-const GEOSERVER_BASE_URL = 'http://localhost:8080/geoserver'
+const GEOSERVER_BASE_URL = process.env.GEOSERVER_BASE_URL
 const mapStyles: React.CSSProperties = {
     width: "100%",
     height: "100vh",
@@ -84,7 +85,13 @@ function ProjectMap() {
 
     const {data: parks} = useParkAndReservesQuery()
     const {data: conservancies} = useConservanciesQuery()
+    const {data: kobo_data} = use_kobo_data()
 
+    useEffect(() => {
+        if (mapContainer.current && mapRef.current && kobo_data) {
+            console.log(`procesing ${(kobo_data)}`)
+        }
+    }, [kobo_data]);
 
     useEffect(() => {
         if (typeof window !== 'undefined' && mapContainer.current && !mapRef.current) {
@@ -155,9 +162,7 @@ function ProjectMap() {
             "click": zoomToFeature,
             // "mouseout": resetHighlight,
         });
-        console.log(projectFeature);
         setOpenPopup(true);
-        console.log(`Opening popup  ${openPopup}`)
         if (
             projectFeature.properties &&
             Object.keys(projectFeature.properties).length > 0
@@ -168,7 +173,6 @@ function ProjectMap() {
                 maxWidth: 250,
                 className: "popup-classname"
             };
-            console.log('Opening popup')
             layer.bindPopup(() => {
                 const div = document.createElement("div");
                 const root = createRoot(div);
@@ -179,32 +183,6 @@ function ProjectMap() {
                 return div.innerHTML;
             }, popupOptions);
         }
-    }
-
-    const Tooltip = (event: any) => {
-        const [anchorEl, setAnchorEl] = React.useState(event);
-
-        const handleClose = () => {
-            setAnchorEl(null);
-        };
-        const open = Boolean(anchorEl);
-        const id = open ? 'simple-popover' : undefined;
-        return (
-            <>
-                <Popover
-                    id={id}
-                    open={open}
-                    anchorEl={anchorEl}
-                    onClose={handleClose}
-                    anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left',
-                    }}
-                >
-                    <Typography sx={{p: 2}}>The content of the Popover.</Typography>
-                </Popover>
-            </>
-        )
     }
 
     const highlightFeature = (e: any) => {
@@ -273,8 +251,6 @@ function ProjectMap() {
         // }
 
         if (mapRef.current && parks) {
-
-            console.log(parks)
             const layerGroup = L.featureGroup()
             if (isValidGeoJsonObject(parks)) {
                 // @ts-ignore
